@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import Home from './src/H';
+import Home from './src/Home';
 import Scanner from './src/Scanner';
 
 import {NavigationContainer} from '@react-navigation/native';

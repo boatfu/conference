@@ -1,84 +1,78 @@
-import React, {useEffect, useState} from 'react';
-import {WebView} from 'react-native-webview';
-import {BackHandler, View, StatusBar, StyleSheet, Text} from 'react-native';
+import React, {Component} from 'react';
 import {baseURL} from './config';
-import Scanner from './Scanner';
+import {WebView} from 'react-native-webview';
+import {BackHandler, View, StatusBar, StyleSheet} from 'react-native';
 
-export default function Home({route, navigation}) {
-  const handleAndroidBack = () => {
-    setCanScan(false);
-    setUri(baseURL);
+export default class Home extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      uri: baseURL,
+    };
+    this.flag = false;
+    this.wv = null;
+    const navigation = props.navigation;
+    navigation.addListener('focus', () => {
+      BackHandler.addEventListener('hardwareBackPress', this.handleAndroidBack);
+      const {route} = this.props;
+      if (route && route.params && route.params.uri) {
+        this.setState({
+          uri: route.params.uri,
+        });
+        route.params.uri = '';
+      }
+    });
+    navigation.addListener('blur', () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        this.handleAndroidBack,
+      );
+    });
+  }
+  handleAndroidBack = () => {
     const reg = /#(\/|\/info|\/search|\/user)$/;
-    if (reg.test(url)) {
+    if (reg.test(this.state.uri)) {
       return true;
     }
-    if (flag && wv) {
-      wv.goBack();
+    if (this.flag && this.wv) {
+      this.wv.goBack();
       return true;
     }
     return true;
   };
 
-  const handleMessage = (e) => {
+  handleMessage = (e) => {
     const {info} = JSON.parse(e.nativeEvent.data);
     if (info === 'scan') {
-      setCanScan(true);
+      this.props.navigation.navigate('Scanner');
     }
   };
 
-  const handleCodeRead = (e) => {
-    if (
-      (e.data.indexOf('http') !== -1 || e.data.indexOf('https') !== -1) &&
-      e.data.match(baseURL)
-    ) {
-      setUri(e.data);
-      setCanScan(false);
-    }
-  };
-
-  const [canScan, setCanScan] = useState(false);
-  const [uri, setUri] = useState(baseURL);
-
-  useEffect(() => {
-    let wv = null;
-    let url = '';
-    let flag = false;
-    console.log('start');
-  }, []);
-  useEffect(() => {
-    navigation.addListener('focus', () => {
-      console.log('focus');
-      BackHandler.addEventListener('hardwareBackPress', handleAndroidBack);
-    });
-    navigation.addListener('blur', () => {
-      console.log('blur');
-      BackHandler.removeEventListener('hardwareBackPress', handleAndroidBack);
-    });
-  }, [navigation]);
-  if (canScan) {
-    return <Scanner onCodeRead={handleCodeRead} />;
+  render() {
+    return (
+      <View style={styles.container}>
+        <StatusBar
+          backgroundColor="rgba(59, 152, 248, 0.9)"
+          barStyle="dark-content"
+        />
+        <WebView
+          onMessage={this.handleMessage}
+          onNavigationStateChange={(state) => {
+            this.state.uri = state.url;
+            this.flag = state.canGoBack;
+          }}
+          originWhitelist={['*']}
+          ref={(webView) => {
+            this.wv = webView;
+          }}
+          source={{
+            uri: this.state.uri,
+            // uri: "http://baidu.com"
+          }}
+        />
+      </View>
+    );
   }
-  return (
-    <View style={styles.container}>
-      <StatusBar
-        backgroundColor="rgba(59, 152, 248, 0.9)"
-        barStyle="dark-content"
-      />
-      <WebView
-        onMessage={handleMessage}
-        onNavigationStateChange={(state) => {
-          url = state.url;
-          flag = state.canGoBack;
-        }}
-        ref={(webView) => {
-          wv = webView;
-        }}
-        source={{
-          uri: uri,
-        }}
-      />
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
