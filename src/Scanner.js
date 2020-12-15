@@ -7,15 +7,15 @@ import {baseURL} from './config';
 export default class Scanner extends Component {
   constructor(props) {
     super(props);
-    // this.state = {};
-    // BackHandler.addEventListener('hardwareBackPress', () => {
-    //   props.navigation.navigate('Home');
-    //   return true;
-    // });
+    this.state = {};
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      props.navigation.navigate('Home');
+      return true;
+    });
   }
-  // componentWillUnmount() {
-  //   BackHandler.removeEventListener('hardwareBackPress');
-  // }
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress');
+  }
 
   throttle = (func) => {
     let flag = true;
@@ -32,27 +32,27 @@ export default class Scanner extends Component {
     };
   };
 
-  // barcodeReceived = (event) => {
-  //   if (
-  //     (event.data.indexOf('http') !== -1 ||
-  //       event.data.indexOf('https') !== -1) &&
-  //     event.data.match(baseURL)
-  //   ) {
-  //     const {navigation} = this.props;
-  //     this.props.route.params.remember.uri = event.data;
-  //     const remember = this.props.route.params.remember;
-  //     navigation.navigate('Home', {
-  //       remember: remember,
-  //     });
-  //   }
-  // };
+  barcodeReceived = (event) => {
+    if (
+      (event.data.indexOf('http') !== -1 ||
+        event.data.indexOf('https') !== -1) &&
+      event.data.match(baseURL)
+    ) {
+      const {navigation} = this.props;
+      navigation.navigate('Home', {
+        uri: event.data
+      });
+    }
+  };
 
   render() {
     return (
       <SafeAreaView style={{flex: 1}}>
         <RNCamera
           style={styles.preview}
-          onBarCodeRead={this.throttle(this.props.onCodeRead.bind(this))}
+          // onBarCodeRead={this.throttle(this.props.onCodeRead.bind(this))}
+          onBarCodeRead={this.throttle(this.barcodeReceived.bind(this))}
+
           // renderFooterView={this.renderMenu}
           captureAudio={false}
           scanBarAnimateReverse>
