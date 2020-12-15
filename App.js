@@ -8,6 +8,7 @@
 
 import React from 'react';
 import Home from './src/Home';
+import Scanner from './src/Scanner';
 
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
@@ -24,6 +25,13 @@ const App = () => {
             headerShown: false,
           }}
         />
+        {/* <Stack.Screen
+          name="Scanner"
+          component={Scanner}
+          options={{
+            headerShown: false,
+          }}
+        /> */}
       </Stack.Navigator>
     </NavigationContainer>
   );
