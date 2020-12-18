@@ -1,7 +1,13 @@
 import React, {Component} from 'react';
 import {baseURL} from './config';
 import {WebView} from 'react-native-webview';
-import {BackHandler, View, StatusBar, StyleSheet} from 'react-native';
+import {
+  BackHandler,
+  View,
+  StatusBar,
+  StyleSheet,
+  ToastAndroid,
+} from 'react-native';
 
 export default class Home extends Component {
   constructor(props) {
@@ -11,6 +17,7 @@ export default class Home extends Component {
     };
     this.flag = false;
     this.wv = null;
+    this.exit = false;
     const navigation = props.navigation;
     navigation.addListener('focus', () => {
       BackHandler.addEventListener('hardwareBackPress', this.handleAndroidBack);
@@ -32,6 +39,7 @@ export default class Home extends Component {
   handleAndroidBack = () => {
     const reg = /#(\/|\/info|\/search|\/user)$/;
     if (reg.test(this.state.uri)) {
+      this.readyExit();
       return true;
     }
     if (this.flag && this.wv) {
@@ -46,6 +54,18 @@ export default class Home extends Component {
     if (info === 'scan') {
       this.props.navigation.navigate('Scanner');
     }
+  };
+
+  readyExit = () => {
+    if (this.exit) {
+      BackHandler.exitApp();
+      return;
+    }
+    ToastAndroid.show('exit if go back again', 1);
+    this.exit = true;
+    setTimeout(() => {
+      this.exit = false;
+    }, 2000);
   };
 
   render() {
@@ -67,7 +87,6 @@ export default class Home extends Component {
           }}
           source={{
             uri: this.state.uri,
-            // uri: "http://baidu.com"
           }}
         />
       </View>
